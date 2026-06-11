@@ -28,6 +28,7 @@ export function transform(records: RawRecord[], discardingDate: Date): Transform
         containerColor = c.value;
       }
       rows.push({
+        caseId: tag,
         no, discardingDate, pid,
         orDate: 'N/A', freezeDate: rec.freezeDate ?? null,
         embryo: null, oocyte: null, sperm: s.count,
@@ -62,6 +63,7 @@ export function transform(records: RawRecord[], discardingDate: Date): Transform
       if (!tec.known) warnings.push(`[${tag}] unknown tec color "${cols[0].tecColorVi}"`);
       const start = gi === 0;
       rows.push({
+        caseId: tag,
         no: start ? no : null,
         discardingDate: start ? discardingDate : null,
         pid: start ? pid : null,

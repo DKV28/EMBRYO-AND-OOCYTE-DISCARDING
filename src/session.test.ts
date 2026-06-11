@@ -15,7 +15,16 @@ const state: SessionState = {
   discardingDate: '2026-06-10',
   auditor: 'Nguyen Tuong Vy',
   records: [rec],
-  compliance: { 'M: 1\nF: 2|E19G9T': { storage: 'N/A', cf: 'Yes', discarding: 'Yes', signatures: 'No' } },
+  compliance: { 'A.pdf|E19G9T': { storage: 'N/A', cf: 'Yes', discarding: 'Yes', signatures: 'No' } },
+  audits: {
+    'A.pdf': {
+      caseKey: 'A.pdf', pid: 'M: 1\nF: 2', orDate: '04/03/2025', auditor: 'NTV',
+      saveCount: 1, timestamp: '10:00 10/06/2026', expectedSample: 'Embryo: 9',
+      sampleCheck: 'Đúng', actualSample: '', sampleNote: '',
+      signatures: 'YES', cfCompliance: 'YES', storageCompliance: 'NO', discardingProc: 'YES',
+      complianceNotes: '', finalResult: 'Không đạt', items: [],
+    },
+  },
 };
 
 describe('session serialize/deserialize', () => {
@@ -25,7 +34,9 @@ describe('session serialize/deserialize', () => {
     expect(back.auditor).toBe('Nguyen Tuong Vy');
     expect(back.records[0].orDate).toEqual(new Date(Date.UTC(2025, 2, 4)));
     expect(back.records[0].freezeDate).toBeNull();
-    expect(back.compliance['M: 1\nF: 2|E19G9T'].signatures).toBe('No');
+    expect(back.compliance['A.pdf|E19G9T'].signatures).toBe('No');
+    expect(back.audits['A.pdf'].finalResult).toBe('Không đạt');
+    expect(back.audits['A.pdf'].storageCompliance).toBe('NO');
   });
 
   it('rejects an unknown schema version', () => {

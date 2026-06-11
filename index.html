@@ -8,44 +8,70 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <main id="app">
-      <h1>Discarding Audit Builder</h1>
-      <p class="sub">Drop the patient destruction PDFs — everything stays in your browser.</p>
+    <header class="page-header">
+      <div class="tag">Tam Anh Hospital · IVF Center</div>
+      <div class="title-top">Discarding Audit</div>
+      <h1>Consent Forms for<br><span>Embryo and Oocyte</span> Discarding</h1>
+    </header>
 
-      <label class="date-row">Discarding date
-        <input type="date" id="discardDate" />
-      </label>
+    <div class="shell">
+      <nav class="tabs">
+        <button class="tab-btn active" type="button" data-view="prepare">Chuẩn bị dữ liệu</button>
+        <button class="tab-btn" type="button" data-view="audit">Nhập liệu audit</button>
+      </nav>
 
-      <label class="date-row">Auditor
-        <input type="text" id="auditor" class="auditor" />
-      </label>
+      <section id="prepareView" class="view active">
+        <div class="card">
+          <div class="card-title">Nguồn dữ liệu</div>
+          <p class="sub">Drop the patient destruction PDFs — everything stays in your browser.</p>
 
-      <div id="dropzone" class="dropzone">
-        <input type="file" id="fileInput" accept="application/pdf" multiple hidden />
-        <span>Drop PDFs here, or <button type="button" id="pickBtn">choose files</button></span>
-      </div>
+          <div class="row">
+            <div class="field">
+              <label>Discarding date</label>
+              <input type="date" id="discardDate" />
+            </div>
+            <div class="field">
+              <label>Auditor</label>
+              <input type="text" id="auditor" class="auditor" />
+            </div>
+          </div>
 
-      <ul id="fileList" class="file-list"></ul>
-      <div id="messages" class="messages"></div>
+          <div id="dropzone" class="dropzone">
+            <input type="file" id="fileInput" accept="application/pdf" multiple hidden />
+            <span>Drop PDFs here, or <button type="button" id="pickBtn">choose files</button></span>
+          </div>
 
-      <h2>Preview</h2>
-      <div id="preview" class="preview"></div>
+          <ul id="fileList" class="file-list"></ul>
+          <div id="messages" class="messages"></div>
+        </div>
 
-      <div class="actions">
-        <button id="downloadBtn" type="button" disabled>Download Excel</button>
-        <button id="reportBtn" type="button" disabled>Download Word report</button>
-      </div>
+        <div class="card">
+          <div class="card-title">Preview</div>
+          <div id="preview" class="preview"></div>
+          <div class="actions">
+            <button id="downloadBtn" type="button" disabled>Download Excel</button>
+            <button id="reportBtn" type="button" disabled>Download Word report</button>
+          </div>
+        </div>
 
-      <div class="sync">
-        <label>Sync code
-          <input type="text" id="syncCode" class="sync-code" placeholder="a secret you choose" />
-        </label>
-        <button id="saveCloudBtn" type="button">Save to cloud</button>
-        <button id="loadCloudBtn" type="button">Load from cloud</button>
-        <span id="syncStatus" class="sync-status"></span>
-        <p class="sync-hint">Prepare data now, set compliance on audit day. Use the same code on another device to continue. Data is encrypted with your code before it leaves the browser.</p>
-      </div>
-    </main>
+        <div class="card">
+          <div class="card-title">Đồng bộ (tùy chọn)</div>
+          <div class="sync">
+            <label>Sync code
+              <input type="text" id="syncCode" class="sync-code" placeholder="a secret you choose" />
+            </label>
+            <button id="saveCloudBtn" type="button">Save to cloud</button>
+            <button id="loadCloudBtn" type="button">Load from cloud</button>
+            <span id="syncStatus" class="sync-status"></span>
+            <p class="sync-hint">Prepare data now, set compliance on audit day. Use the same code on another device to continue. Data is encrypted with your code before it leaves the browser.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="auditView" class="view"></section>
+    </div>
+
+    <div class="toast" id="toast"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

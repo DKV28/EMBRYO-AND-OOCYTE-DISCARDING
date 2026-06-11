@@ -37,6 +37,7 @@ export interface RawRecord {
 // 'N/A' marks a column the source form does not have (one column = one info).
 // null marks a merged continuation cell (multi-location cases).
 export interface OutputRow {
+  caseId: string;   // stable per-case key (the source PDF file name)
   no: number | null;
   discardingDate: Date | null;
   pid: string | null;

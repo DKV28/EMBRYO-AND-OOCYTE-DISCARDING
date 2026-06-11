@@ -1,4 +1,5 @@
 import type { RawRecord } from './types';
+import type { AuditRecord } from './audit/model';
 
 // A saved working session: parsed records + audit metadata + the compliance the
 // auditor has entered so far (keyed so it survives re-transform and reload).
@@ -14,6 +15,7 @@ export interface SessionState {
   auditor: string;
   records: RawRecord[];
   compliance: Record<string, ComplianceValues>;  // rowKey → values
+  audits: Record<string, AuditRecord>;            // caseKey → audit (no Date fields)
 }
 
 const SCHEMA_VERSION = 1;
@@ -40,6 +42,7 @@ export function serializeSession(state: SessionState): string {
     auditor: state.auditor,
     records: state.records.map(serializeRecord),
     compliance: state.compliance,
+    audits: state.audits,
   });
 }
 
@@ -53,5 +56,6 @@ export function deserializeSession(json: string): SessionState {
     auditor: o.auditor ?? '',
     records: (o.records ?? []).map(reviveRecord),
     compliance: o.compliance ?? {},
+    audits: o.audits ?? {},
   };
 }

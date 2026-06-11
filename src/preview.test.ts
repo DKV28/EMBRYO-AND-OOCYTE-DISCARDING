@@ -4,7 +4,7 @@ import type { OutputRow } from './types';
 
 function baseRow(over: Partial<OutputRow>): OutputRow {
   return {
-    no: null, discardingDate: null, pid: null, orDate: null, freezeDate: null,
+    caseId: 'C', no: null, discardingDate: null, pid: null, orDate: null, freezeDate: null,
     embryo: null, oocyte: null, sperm: null,
     location: 'X', numCassettes: 1, cassetteColor: 'Red', numTec: 1, tecColor: 'Green',
     numContainers: 'N/A', containerType: 'N/A', containerColor: 'N/A', origin: 'N/A', note: 'N/A',

@@ -10,6 +10,8 @@ import { nearestWednesday, formatYmd } from './dates';
 import { serializeSession, deserializeSession, type SessionState, type ComplianceValues } from './session';
 import { saveLocal, loadLocal } from './localCache';
 import { syncConfigured, saveSession, loadSession } from './supabaseSync';
+import { setupAuditView } from './audit/view';
+import { buildCase, complianceToOverlay, type AuditCase, type AuditRecord } from './audit/model';
 import type { RawRecord, OutputRow } from './types';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -41,7 +43,9 @@ let displayedRows: OutputRow[] = [];
 // reload. The dropdowns mutate displayedRows; captureCompliance() folds those edits
 // back into this map, applyCompliance() restores them onto freshly transformed rows.
 const complianceByKey = new Map<string, ComplianceValues>();
-const rowKey = (r: OutputRow) => `${r.pid ?? ''}|${r.location}`;
+const rowKey = (r: OutputRow) => `${r.caseId}|${r.location}`;
+// Saved audits, keyed by caseId (= source PDF file name).
+const audits: Record<string, AuditRecord> = {};
 
 function captureCompliance() {
   for (const r of displayedRows) {
@@ -133,7 +137,9 @@ function rerender() {
   downloadBtn.disabled = rows.length === 0;
   reportBtn.disabled = rows.length === 0;
   persistLocal();
+  auditApi?.refreshCases();
 }
+let auditApi: { refreshCases: () => void } | null = null;
 
 function auditDate() { return dateInput.valueAsDate ?? new Date(dateInput.value); }
 
@@ -144,6 +150,7 @@ function buildState(): SessionState {
     auditor: auditorInput.value,
     records: entries.filter(e => e.status === 'ok').map(e => e.record!),
     compliance: Object.fromEntries(complianceByKey),
+    audits,
   };
 }
 function persistLocal() {
@@ -156,6 +163,8 @@ function restore(state: SessionState) {
   for (const rec of state.records) entries.push({ fileName: rec.fileName, status: 'ok', record: rec });
   complianceByKey.clear();
   for (const [k, v] of Object.entries(state.compliance)) complianceByKey.set(k, v);
+  for (const k of Object.keys(audits)) delete audits[k];
+  Object.assign(audits, state.audits);
   rerender();
 }
 
@@ -217,6 +226,51 @@ loadCloudBtn.onclick = async () => {
     setSync(`Loaded ✓ (${new Date().toLocaleTimeString()})`);
   } catch (err) { setSync(`Load failed (wrong code?): ${(err as Error).message}`); }
 };
+
+// --- Toast ---
+const toastEl = $<HTMLDivElement>('toast');
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+function toast(msg: string, type: 'success' | 'error') {
+  toastEl.textContent = msg;
+  toastEl.className = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 3300);
+}
+
+// --- Tabs ---
+document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    b.classList.add('active');
+    $(b.dataset.view + 'View').classList.add('active');
+  });
+});
+
+// --- Audit entry view ---
+function auditCases(): AuditCase[] {
+  return entries.filter(e => e.status === 'ok').map(e => buildCase(e.record!, auditDate()));
+}
+auditApi = setupAuditView({
+  container: $<HTMLDivElement>('auditView'),
+  getCases: auditCases,
+  getSavedAudit: key => audits[key],
+  defaultAuditor: () => auditorInput.value.trim() || DEFAULT_AUDITOR,
+  toast,
+  onSave: record => {
+    audits[record.caseKey] = record;
+    // Feed the case-level compliance into every location row of that case so the
+    // Excel/Word exports reflect the audit result.
+    const ov = complianceToOverlay(record);
+    for (const r of displayedRows) {
+      if (r.caseId === record.caseKey) {
+        r.storageCompliance = ov.storage; r.cfCompliance = ov.cf;
+        r.discardingProcedure = ov.discarding; r.signaturesCompliance = ov.signatures;
+      }
+    }
+    rerender();   // folds the compliance into the overlay + persists
+  },
+});
 
 // --- Restore any local autosave on startup ---
 (() => {
