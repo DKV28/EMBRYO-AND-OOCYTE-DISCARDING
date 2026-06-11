@@ -35,7 +35,7 @@ export function transform(records: RawRecord[], discardingDate: Date): Transform
         numCassettes: 'N/A', cassetteColor: 'N/A', numTec: 'N/A', tecColor: 'N/A',
         numContainers: s.count, containerType: isCryotube ? 'Cryotube' : 'Tec', containerColor,
         origin: s.origin, note: s.note,
-        storageCompliance: '', cfCompliance: '', discardingProcedure: '',
+        storageCompliance: '', cfCompliance: '', discardingProcedure: '', signaturesCompliance: '',
         isCaseStart: true, caseRowSpan: 1,
       });
       return;
@@ -81,6 +81,7 @@ export function transform(records: RawRecord[], discardingDate: Date): Transform
         storageCompliance: '',
         cfCompliance: '',
         discardingProcedure: '',
+        signaturesCompliance: '',
         isCaseStart: start,
         caseRowSpan: order.length,
       });

@@ -37,22 +37,19 @@ export function renderPreview(rows: OutputRow[]): HTMLTableElement {
   const thead = table.createTHead();
   const r1 = thead.insertRow();
   r1.append(
-    th('No.', '', { rowspan: '2' }), th('Discarding date', '', { rowspan: '2' }),
-    th('PID', '', { rowspan: '2' }), th('OR Date', '', { rowspan: '2' }),
-    th('Freeze date', '', { rowspan: '2' }),
+    th('No.', '', { rowspan: '2' }), th('PID', '', { rowspan: '2' }),
+    th('OR Date', '', { rowspan: '2' }),
     th('Sample', 'group-sample', { colspan: '3' }),
     th('Location', '', { rowspan: '2' }), th('Number of cassettes', '', { rowspan: '2' }),
     th('Color of cassettes', '', { rowspan: '2' }), th('Number of tec', '', { rowspan: '2' }),
     th('Color of tec', '', { rowspan: '2' }),
-    th('Containers', '', { rowspan: '2' }), th('Container type', '', { rowspan: '2' }),
-    th('Container color', '', { rowspan: '2' }),
-    th('Loại mẫu hủy', '', { rowspan: '2' }), th('Ghi chú', '', { rowspan: '2' }),
-    th('Compliance', 'group-compliance', { colspan: '3' }),
+    th('Compliance', 'group-compliance', { colspan: '4' }),
   );
   const r2 = thead.insertRow();
   r2.append(
     th('Embryo', 'group-sample'), th('Oocyte', 'group-sample'), th('Sperm', 'group-sample'),
-    th('Storage', 'group-compliance'), th('CF', 'group-compliance'), th('Discarding', 'group-compliance'),
+    th('Storage', 'group-compliance'), th('CF', 'group-compliance'),
+    th('Discarding', 'group-compliance'), th('Signatures', 'group-compliance'),
   );
 
   const tbody = table.createTBody();
@@ -63,20 +60,18 @@ export function renderPreview(rows: OutputRow[]): HTMLTableElement {
     if (r.isCaseStart) {
       const span: Record<string, string> = r.caseRowSpan > 1 ? { rowspan: String(r.caseRowSpan) } : {};
       tr.append(
-        td(num(r.no), span), td(date(r.discardingDate), span),
+        td(num(r.no), span),
         td((r.pid ?? '').replace(/\n/g, '<br>'), span), td(date(r.orDate), span),
-        td(date(r.freezeDate), span),
         td(num(r.embryo), span), td(num(r.oocyte), span), td(num(r.sperm), span),
       );
     }
     tr.append(
       td(r.location), td(num(r.numCassettes)), td(r.cassetteColor),
       td(num(r.numTec)), td(r.tecColor),
-      td(num(r.numContainers)), td(r.containerType), td(r.containerColor),
-      td(r.origin), td(r.note),
       complianceCell(r.storageCompliance, v => { r.storageCompliance = v; }),
       complianceCell(r.cfCompliance, v => { r.cfCompliance = v; }),
       complianceCell(r.discardingProcedure, v => { r.discardingProcedure = v; }),
+      complianceCell(r.signaturesCompliance, v => { r.signaturesCompliance = v; }),
     );
   }
   return table;

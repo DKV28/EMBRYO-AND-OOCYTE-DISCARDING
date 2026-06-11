@@ -58,6 +58,7 @@ export interface OutputRow {
   storageCompliance: string;
   cfCompliance: string;
   discardingProcedure: string;
+  signaturesCompliance: string;
   isCaseStart: boolean;
   caseRowSpan: number;
 }

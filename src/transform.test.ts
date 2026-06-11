@@ -49,7 +49,7 @@ describe('transform', () => {
     expect(rows[0]).toMatchObject({
       no: 1, pid: 'M: 2510039264\nF: 2510039262', embryo: 9, oocyte: null, sperm: null,
       location: 'E19G9T', numCassettes: 2, cassetteColor: 'Red', numTec: 6, tecColor: 'Yellow',
-      storageCompliance: '', cfCompliance: '', discardingProcedure: '',
+      storageCompliance: '', cfCompliance: '', discardingProcedure: '', signaturesCompliance: '',
       isCaseStart: true, caseRowSpan: 1,
     });
     expect(rows[0].discardingDate).toEqual(DATE);
