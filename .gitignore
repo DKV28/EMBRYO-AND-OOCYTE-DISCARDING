@@ -1,0 +1,16 @@
+# Dependencies & build output
+node_modules/
+dist/
+
+# Patient health information (PHI) — NEVER commit. See samples/README.md.
+*.pdf
+*.xlsx
+*.jpeg
+*.jpg
+samples/*
+!samples/README.md
+new_pdfs_to_parse/
+
+# OS / editor cruft
+.DS_Store
+*.local
