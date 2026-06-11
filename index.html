@@ -16,6 +16,10 @@
         <input type="date" id="discardDate" />
       </label>
 
+      <label class="date-row">Auditor
+        <input type="text" id="auditor" class="auditor" />
+      </label>
+
       <div id="dropzone" class="dropzone">
         <input type="file" id="fileInput" accept="application/pdf" multiple hidden />
         <span>Drop PDFs here, or <button type="button" id="pickBtn">choose files</button></span>
@@ -27,7 +31,10 @@
       <h2>Preview</h2>
       <div id="preview" class="preview"></div>
 
-      <button id="downloadBtn" type="button" disabled>Download Excel</button>
+      <div class="actions">
+        <button id="downloadBtn" type="button" disabled>Download Excel</button>
+        <button id="reportBtn" type="button" disabled>Download Word report</button>
+      </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

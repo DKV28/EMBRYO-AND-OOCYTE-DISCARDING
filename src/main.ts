@@ -5,6 +5,7 @@ import { validateFile } from './fileValidation';
 import { transform } from './transform';
 import { renderPreview } from './preview';
 import { workbookBlob } from './excelWriter';
+import { reportBlob, DEFAULT_AUDITOR } from './reportWriter';
 import { nearestWednesday, formatYmd } from './dates';
 import type { RawRecord, OutputRow } from './types';
 
@@ -20,8 +21,11 @@ const fileList = $<HTMLUListElement>('fileList');
 const messages = $<HTMLDivElement>('messages');
 const preview = $<HTMLDivElement>('preview');
 const downloadBtn = $<HTMLButtonElement>('downloadBtn');
+const reportBtn = $<HTMLButtonElement>('reportBtn');
+const auditorInput = $<HTMLInputElement>('auditor');
 
 dateInput.value = formatYmd(nearestWednesday(new Date()));
+auditorInput.value = DEFAULT_AUDITOR;
 
 const entries: Entry[] = [];
 // Rows backing the current preview. The compliance dropdowns mutate these objects
@@ -94,7 +98,10 @@ function rerender() {
   preview.innerHTML = '';
   if (rows.length) preview.append(renderPreview(rows));
   downloadBtn.disabled = rows.length === 0;
+  reportBtn.disabled = rows.length === 0;
 }
+
+function auditDate() { return dateInput.valueAsDate ?? new Date(dateInput.value); }
 
 $('pickBtn').onclick = () => fileInput.click();
 fileInput.onchange = () => { if (fileInput.files) addFiles(fileInput.files); fileInput.value = ''; };
@@ -109,6 +116,16 @@ downloadBtn.onclick = async () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `Monitoring_Discarding audit ${dateInput.value}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+reportBtn.onclick = async () => {
+  if (!displayedRows.length) return;
+  const blob = await reportBlob(displayedRows, { auditor: auditorInput.value.trim() || DEFAULT_AUDITOR, auditDate: auditDate() });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Audit report - discarding ${dateInput.value}.docx`;
   a.click();
   URL.revokeObjectURL(a.href);
 };

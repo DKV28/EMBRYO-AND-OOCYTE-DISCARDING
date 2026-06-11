@@ -17,6 +17,8 @@ h1 { margin-bottom: .25rem; }
 .preview thead th.group-sample, .preview thead th.group-compliance { background: #ead1dc; }
 .preview td.compliance { padding: 2px; }
 .preview td.compliance select { font: inherit; padding: 1px 4px; border: 1px solid #bbb; border-radius: 4px; background: #fff; min-width: 56px; }
+.auditor { min-width: 22rem; font: inherit; padding: .2rem .4rem; }
 button { cursor: pointer; padding: .4rem .8rem; }
-#downloadBtn { margin-top: 1rem; font-size: 1rem; padding: .6rem 1.2rem; }
-#downloadBtn:disabled { opacity: .5; cursor: not-allowed; }
+.actions { margin-top: 1rem; display: flex; gap: .75rem; flex-wrap: wrap; }
+.actions button { font-size: 1rem; padding: .6rem 1.2rem; }
+button:disabled { opacity: .5; cursor: not-allowed; }
