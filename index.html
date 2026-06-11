@@ -35,6 +35,16 @@
         <button id="downloadBtn" type="button" disabled>Download Excel</button>
         <button id="reportBtn" type="button" disabled>Download Word report</button>
       </div>
+
+      <div class="sync">
+        <label>Sync code
+          <input type="text" id="syncCode" class="sync-code" placeholder="a secret you choose" />
+        </label>
+        <button id="saveCloudBtn" type="button">Save to cloud</button>
+        <button id="loadCloudBtn" type="button">Load from cloud</button>
+        <span id="syncStatus" class="sync-status"></span>
+        <p class="sync-hint">Prepare data now, set compliance on audit day. Use the same code on another device to continue. Data is encrypted with your code before it leaves the browser.</p>
+      </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

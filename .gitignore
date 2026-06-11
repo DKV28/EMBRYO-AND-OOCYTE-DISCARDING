@@ -11,6 +11,10 @@ samples/*
 !samples/README.md
 new_pdfs_to_parse/
 
+# Secrets / local env (Supabase keys)
+.env
+.env.local
+
 # OS / editor cruft
 .DS_Store
 *.local
