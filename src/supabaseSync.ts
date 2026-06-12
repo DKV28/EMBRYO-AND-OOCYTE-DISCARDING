@@ -7,8 +7,8 @@ import { encryptString, decryptString, rowId } from './crypto';
 // Vercel dashboard); otherwise the baked-in project below is used. The anon key
 // is a public frontend key by design — confidentiality relies on the client-side
 // encryption + RLS, not on hiding it.
-const DEFAULT_URL = 'https://wsrzyxrdrgfsabvistff.supabase.co';
-const DEFAULT_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indzcnp5eHJkcmdmc2FidmlzdGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNjc5NDUsImV4cCI6MjA5NjY0Mzk0NX0.lvqOxXQUXojCzsies1uZ1OFH41UitYZQSGUAY34VzM0';
+const DEFAULT_URL = 'https://ackfeuuybqfscbycyfcs.supabase.co';
+const DEFAULT_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFja2ZldXV5YnFmc2NieWN5ZmNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTQxMzYsImV4cCI6MjA5Njc5MDEzNn0.JRpieS3Df940ccZryPhZ5twyb8KW4gM1rScVpmVhkRo';
 const URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_URL;
 const ANON = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || DEFAULT_ANON;
 
