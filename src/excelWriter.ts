@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import type { OutputRow } from './types';
+import { bankCodeFromNote } from './bankCode';
 
 const CREAM = 'FFFFF2CC';
 const PINK = 'FFEAD1DC';
@@ -11,13 +12,13 @@ function styleHeader(cell: ExcelJS.Cell, text: string, fill: string) {
   cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
 }
 
-// Matches the "Monitoring_Discarding audit" template (15 cols):
+// Based on the "Monitoring_Discarding audit" template (16 cols):
 // A No | B PID | C OR Date | D-F Sample (Embryo/Oocyte/Sperm) | G Location |
 // H Number of cassettes | I Color of cassettes | J Number of tec | K Color of tec |
-// L-O Compliance (Storage / CF / Discarding Procedure / Signatures).
-const LAST_COL = 15; // O
+// L Sperm bank code | M-P Compliance (Storage / CF / Discarding Procedure / Signatures).
+const LAST_COL = 16; // P
 const CASE_COLS = 6; // A-F merge vertically for multi-location cases
-const FIRST_COMPLIANCE = 12; // L
+const FIRST_COMPLIANCE = 13; // M
 
 export async function buildWorkbook(rows: OutputRow[]): Promise<ExcelJS.Workbook> {
   const wb = new ExcelJS.Workbook();
@@ -36,11 +37,12 @@ export async function buildWorkbook(rows: OutputRow[]): Promise<ExcelJS.Workbook
   ws.mergeCells('I1:I2'); styleHeader(ws.getCell('I1'), 'Color of cassettes', CREAM);
   ws.mergeCells('J1:J2'); styleHeader(ws.getCell('J1'), 'Number of tec', CREAM);
   ws.mergeCells('K1:K2'); styleHeader(ws.getCell('K1'), 'Color of tec', CREAM);
-  ws.mergeCells('L1:O1'); styleHeader(ws.getCell('L1'), 'Compliance', PINK);
-  styleHeader(ws.getCell('L2'), 'Storage\nCompliance', PINK);
-  styleHeader(ws.getCell('M2'), 'CF\nCompliance', PINK);
-  styleHeader(ws.getCell('N2'), 'Discarding\nProcedure', PINK);
-  styleHeader(ws.getCell('O2'), 'Signatures\nCompliance', PINK);
+  ws.mergeCells('L1:L2'); styleHeader(ws.getCell('L1'), 'Sperm bank code', CREAM);
+  ws.mergeCells('M1:P1'); styleHeader(ws.getCell('M1'), 'Compliance', PINK);
+  styleHeader(ws.getCell('M2'), 'Storage\nCompliance', PINK);
+  styleHeader(ws.getCell('N2'), 'CF\nCompliance', PINK);
+  styleHeader(ws.getCell('O2'), 'Discarding\nProcedure', PINK);
+  styleHeader(ws.getCell('P2'), 'Signatures\nCompliance', PINK);
 
   // --- Data (from row 3) ---
   const FIRST = 3;
@@ -68,11 +70,12 @@ export async function buildWorkbook(rows: OutputRow[]): Promise<ExcelJS.Workbook
     set(7, r.location);
     set(8, r.numCassettes); set(9, r.cassetteColor);
     set(10, r.numTec); set(11, r.tecColor);
+    set(12, bankCodeFromNote(r.note));
     // Compliance: only write a value when the auditor chose one; otherwise leave blank.
-    if (r.storageCompliance) set(12, r.storageCompliance);
-    if (r.cfCompliance) set(13, r.cfCompliance);
-    if (r.discardingProcedure) set(14, r.discardingProcedure);
-    if (r.signaturesCompliance) set(15, r.signaturesCompliance);
+    if (r.storageCompliance) set(13, r.storageCompliance);
+    if (r.cfCompliance) set(14, r.cfCompliance);
+    if (r.discardingProcedure) set(15, r.discardingProcedure);
+    if (r.signaturesCompliance) set(16, r.signaturesCompliance);
 
     // styling: Calibri 11, wrap, vcenter; PID left, others centered
     for (let c = 1; c <= LAST_COL; c++) {
@@ -117,7 +120,7 @@ export async function buildWorkbook(rows: OutputRow[]): Promise<ExcelJS.Workbook
   // --- Column widths (match template) ---
   const widths: Record<number, number> = {
     1: 5, 2: 18, 3: 12, 4: 8, 5: 8, 6: 8, 7: 11, 8: 11, 9: 13, 10: 10, 11: 12,
-    12: 15, 13: 12, 14: 13, 15: 13,
+    12: 14, 13: 15, 14: 12, 15: 13, 16: 13,
   };
   for (const [c, w] of Object.entries(widths)) ws.getColumn(+c).width = w;
 

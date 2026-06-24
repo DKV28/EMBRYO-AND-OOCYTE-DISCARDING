@@ -8,7 +8,7 @@ import { workbookBlob } from './excelWriter';
 import { reportBlob, DEFAULT_AUDITOR } from './reportWriter';
 import { nearestWednesday, formatYmd } from './dates';
 import { serializeSession, deserializeSession, type SessionState, type ComplianceValues } from './session';
-import { saveLocal, loadLocal } from './localCache';
+import { saveLocal, loadLocal, saveCode, loadCode } from './localCache';
 import { syncConfigured, saveSession, loadSession } from './supabaseSync';
 import { setupAuditView } from './audit/view';
 import { buildCase, complianceToOverlay, type AuditCase, type AuditRecord } from './audit/model';
@@ -46,6 +46,9 @@ const complianceByKey = new Map<string, ComplianceValues>();
 const rowKey = (r: OutputRow) => `${r.caseId}|${r.location}`;
 // Saved audits, keyed by caseId (= source PDF file name).
 const audits: Record<string, AuditRecord> = {};
+// True while loading/restoring state, so the re-render it triggers does NOT
+// auto-push the just-loaded data back to the cloud (would clobber newer remote data).
+let restoring = false;
 
 function captureCompliance() {
   for (const r of displayedRows) {
@@ -155,17 +158,40 @@ function buildState(): SessionState {
 }
 function persistLocal() {
   try { saveLocal(serializeSession(buildState())); } catch { /* ignore */ }
+  scheduleCloudSync();
+}
+
+// Auto-push to the cloud (debounced) on any change, so audit edits made on one
+// device reach the others without a manual "Save to cloud". Needs a sync code.
+let cloudTimer: ReturnType<typeof setTimeout> | undefined;
+function scheduleCloudSync() {
+  if (!syncConfigured || restoring) return;
+  const code = syncCode.value.trim();
+  if (!code) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(async () => {
+    setSync('Đang đồng bộ…');
+    try {
+      await saveSession(code, serializeSession(buildState()));
+      setSync(`Đã đồng bộ ✓ (${new Date().toLocaleTimeString()})`);
+    } catch (err) { setSync(`Đồng bộ lỗi: ${(err as Error).message}`); }
+  }, 1500);
 }
 function restore(state: SessionState) {
-  dateInput.value = state.discardingDate ?? dateInput.value;
-  if (state.auditor) auditorInput.value = state.auditor;
-  entries.length = 0;
-  for (const rec of state.records) entries.push({ fileName: rec.fileName, status: 'ok', record: rec });
-  complianceByKey.clear();
-  for (const [k, v] of Object.entries(state.compliance)) complianceByKey.set(k, v);
-  for (const k of Object.keys(audits)) delete audits[k];
-  Object.assign(audits, state.audits);
-  rerender();
+  restoring = true;
+  try {
+    dateInput.value = state.discardingDate ?? dateInput.value;
+    if (state.auditor) auditorInput.value = state.auditor;
+    entries.length = 0;
+    for (const rec of state.records) entries.push({ fileName: rec.fileName, status: 'ok', record: rec });
+    complianceByKey.clear();
+    for (const [k, v] of Object.entries(state.compliance)) complianceByKey.set(k, v);
+    for (const k of Object.keys(audits)) delete audits[k];
+    Object.assign(audits, state.audits);
+    rerender();
+  } finally {
+    restoring = false;
+  }
 }
 
 // Autosave when the auditor changes a compliance dropdown (events bubble to #preview).
@@ -205,6 +231,9 @@ if (!syncConfigured) {
   saveCloudBtn.disabled = true; loadCloudBtn.disabled = true;
   setSync('Cloud sync not configured (set Supabase env vars).');
 }
+// Remember the sync code on this device (enables auto-sync after a reload).
+syncCode.value = loadCode();
+syncCode.addEventListener('input', () => saveCode(syncCode.value.trim()));
 saveCloudBtn.onclick = async () => {
   const code = syncCode.value.trim();
   if (!code) return setSync('Enter a sync code first.');

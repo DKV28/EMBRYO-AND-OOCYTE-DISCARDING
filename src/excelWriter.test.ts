@@ -23,11 +23,12 @@ const rows: OutputRow[] = [
   baseRow({
     no: 3, pid: 'M: 2410022517', orDate: 'N/A',
     sperm: 1, location: 'TS4-G2D', numCassettes: 'N/A', cassetteColor: 'N/A', numTec: 'N/A', tecColor: 'N/A',
+    note: 'MÃ NHTT: 2414418',
   }),
 ];
 
 describe('buildWorkbook', () => {
-  it('produces the template header, merges, formats, dropdowns, total (15 cols)', async () => {
+  it('produces the template header, merges, formats, dropdowns, total (16 cols)', async () => {
     const wb = await buildWorkbook(rows);
     const buf = await wb.xlsx.writeBuffer();
     const wb2 = new ExcelJS.Workbook();
@@ -41,24 +42,26 @@ describe('buildWorkbook', () => {
     expect(ws.getCell('F2').value).toBe('Sperm');
     expect(ws.getCell('G1').value).toBe('Location');
     expect(ws.getCell('H1').value).toBe('Number of cassettes');
-    expect(ws.getCell('L1').value).toBe('Compliance');
-    expect(ws.getCell('L2').value).toContain('Storage');
-    expect(ws.getCell('O2').value).toContain('Signatures');
+    expect(ws.getCell('L1').value).toBe('Sperm bank code');
+    expect(ws.getCell('M1').value).toBe('Compliance');
+    expect(ws.getCell('M2').value).toContain('Storage');
+    expect(ws.getCell('P2').value).toContain('Signatures');
 
     const merges: string[] = (ws as any).model.merges;
-    expect(merges).toEqual(expect.arrayContaining(['D1:F1', 'L1:O1', 'A1:A2']));
+    expect(merges).toEqual(expect.arrayContaining(['D1:F1', 'M1:P1', 'A1:A2', 'L1:L2']));
     // multi-location case (rows 4-5) merges col A vertically
     expect(merges).toEqual(expect.arrayContaining(['A4:A5']));
 
     expect(ws.getCell('C3').numFmt.toLowerCase()).toContain('dd'); // OR date is a real date
     expect(ws.getCell('B3').value).toContain('\n');                // PID has M/F lines
     expect(ws.getCell('D3').value).toBe(9);                        // embryo count
-    expect(ws.getCell('L3').dataValidation?.type).toBe('list');
-    expect(ws.getCell('L3').dataValidation?.formulae).toEqual(['"N/A,Yes,No"']);
-    expect(ws.getCell('O3').dataValidation?.type).toBe('list');    // Signatures dropdown too
+    expect(ws.getCell('L3').value ?? '').toBe('');                 // embryo row: no bank code
+    expect(ws.getCell('M3').dataValidation?.type).toBe('list');
+    expect(ws.getCell('M3').dataValidation?.formulae).toEqual(['"N/A,Yes,No"']);
+    expect(ws.getCell('P3').dataValidation?.type).toBe('list');    // Signatures dropdown too
     // Compliance is auditor-entered: empty values leave the cell blank.
-    expect(ws.getCell('L3').value ?? '').toBe('');
-    expect(ws.getCell('O3').value ?? '').toBe('');
+    expect(ws.getCell('M3').value ?? '').toBe('');
+    expect(ws.getCell('P3').value ?? '').toBe('');
 
     // sperm case on row 6: same table, cassette/tec N/A
     expect(ws.getCell('C6').value).toBe('N/A');   // no OR date
@@ -66,6 +69,7 @@ describe('buildWorkbook', () => {
     expect(ws.getCell('G6').value).toBe('TS4-G2D');
     expect(ws.getCell('H6').value).toBe('N/A');   // cassettes N/A
     expect(ws.getCell('K6').value).toBe('N/A');   // tec color N/A
+    expect(ws.getCell('L6').value).toBe('2414418'); // sperm bank code (extracted)
 
     // Total row after 4 data rows (rows 3-6) → row 7
     expect(ws.getCell('C7').value).toBe('Total');

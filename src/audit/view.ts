@@ -89,6 +89,20 @@ export function setupAuditView(opts: AuditViewOptions): { refreshCases: () => vo
       onNote: v => { current!.sampleNote = v; },
     });
     card.append(row);
+    // Sperm bank code check — only for sperm cases that carry a bank code.
+    if (current!.bank.expected) {
+      card.append(checkRow({
+        title: 'Sperm bank code',
+        expected: current!.bank.expected,
+        check: current!.bank.check,
+        actual: current!.bank.actual,
+        note: current!.bank.note,
+        actualPlaceholder: 'Mã NHTT thực tế',
+        onCheck: v => { current!.bank.check = v; },
+        onActual: v => { current!.bank.actual = v; },
+        onNote: v => { current!.bank.note = v; },
+      }));
+    }
     return card;
   }
 

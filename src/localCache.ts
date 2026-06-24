@@ -12,3 +12,13 @@ export function loadLocal(): string | null {
 export function clearLocal(): void {
   try { localStorage.removeItem(KEY); } catch { /* ignore */ }
 }
+
+// Remember the sync code on this device so auto cloud-sync keeps working after a
+// reload (it's the encryption passphrase — same on-device trust as the cache above).
+const CODE_KEY = 'discarding-audit-sync-code';
+export function saveCode(code: string): void {
+  try { localStorage.setItem(CODE_KEY, code); } catch { /* ignore */ }
+}
+export function loadCode(): string {
+  try { return localStorage.getItem(CODE_KEY) ?? ''; } catch { return ''; }
+}

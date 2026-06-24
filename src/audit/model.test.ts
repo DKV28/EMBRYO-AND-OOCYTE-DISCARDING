@@ -13,6 +13,13 @@ const anh: RawRecord = {
   ],
   warnings: [],
 };
+const sperm: RawRecord = {
+  fileName: 'AN.pdf', form: '266', wifeName: '', husbandName: 'H',
+  wifePID: '', husbandPID: '2410022517', orDate: null, freezeDate: new Date(Date.UTC(2025, 2, 17)),
+  samples: [{ type: 'Sperm', count: 1 }], columns: [],
+  sperm266: { location: 'TS4-G2D', containerColorVi: 'VÀNG', count: 1, origin: 'PESA', note: 'MÃ NHTT: 2414418' },
+  warnings: [],
+};
 const DATE = new Date(Date.UTC(2026, 5, 10));
 
 describe('buildCase', () => {
@@ -21,10 +28,34 @@ describe('buildCase', () => {
     expect(c.key).toBe('ANH.pdf');
     expect(c.orDate).toBe('09/06/2025');
     expect(c.expectedSample).toBe('Embryo: 2');
+    expect(c.expectedBankCode).toBe('');           // embryo case → no bank code
     expect(c.expectedItems).toHaveLength(2);
     expect(c.expectedItems[0].fields.location.expected).toBe('E23G6T');
     expect(c.expectedItems[0].fields.colorCassettes.expected).toBe('Green');
     expect(c.expectedItems[1].fields.location.expected).toBe('E25G1G');
+  });
+  it('extracts the sperm bank code for 266 cases', () => {
+    const c = buildCase(sperm, DATE);
+    expect(c.expectedBankCode).toBe('2414418');
+    expect(blankAudit(c, 'NTV').bank.expected).toBe('2414418');
+  });
+});
+
+describe('validateAudit — sperm bank code', () => {
+  function validSperm(): AuditRecord {
+    const rec = blankAudit(buildCase(sperm, DATE), 'NTV');
+    rec.sampleCheck = 'Đúng';
+    rec.signatures = rec.cfCompliance = rec.storageCompliance = rec.discardingProc = 'YES';
+    rec.finalResult = 'Đạt';
+    rec.items.forEach(it => { it.verdict = 'Đạt'; });
+    return rec;
+  }
+  it('requires a bank-code check when a bank code is expected', () => {
+    expect(validateAudit(validSperm())).toMatch(/Sperm bank code/);
+  });
+  it('passes once the bank code is ticked', () => {
+    const r = validSperm(); r.bank.check = 'Đúng';
+    expect(validateAudit(r)).toBe('');
   });
 });
 

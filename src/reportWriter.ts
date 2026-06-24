@@ -4,6 +4,7 @@ import {
 } from 'docx';
 import type { OutputRow } from './types';
 import { formatDmy } from './dates';
+import { bankCodeFromNote } from './bankCode';
 
 // Reproduces the "AUDIT REPORT — CONSENT FORMS FOR EMBRYO AND SPERM DISCARDING"
 // Word template: title block + metadata + the same 15-column table as the Excel
@@ -63,6 +64,7 @@ function headerRows(): TableRow[] {
       cell('Color of cassettes', { bold: true, fill: CREAM, rowSpan: 2 }),
       cell('Number of tec', { bold: true, fill: CREAM, rowSpan: 2 }),
       cell('Color of tec', { bold: true, fill: CREAM, rowSpan: 2 }),
+      cell('Sperm bank code', { bold: true, fill: CREAM, rowSpan: 2 }),
       cell('Compliance', { bold: true, fill: PINK, columnSpan: 4 }),
     ],
   });
@@ -97,6 +99,7 @@ function dataRow(r: OutputRow): TableRow {
   children.push(
     cell(r.location), cell(num(r.numCassettes)), cell(r.cassetteColor),
     cell(num(r.numTec)), cell(r.tecColor),
+    cell(bankCodeFromNote(r.note)),
     cell(r.storageCompliance), cell(r.cfCompliance),
     cell(r.discardingProcedure), cell(r.signaturesCompliance),
   );

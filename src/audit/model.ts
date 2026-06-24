@@ -2,6 +2,7 @@ import type { RawRecord, OutputRow } from '../types';
 import type { ComplianceValues } from '../session';
 import { transform } from '../transform';
 import { formatDmy } from '../dates';
+import { bankCodeFromNote } from '../bankCode';
 
 // Audit data model — ported from the reference audit form (Google-Sheets parts
 // dropped). "Expected" comes from the prepared PDF case; the auditor fills in the
@@ -45,6 +46,7 @@ export interface AuditRecord {
   discardingProc: YesNo;
   complianceNotes: string;
   finalResult: Verdict;
+  bank: AuditField;        // sperm bank code check (expected from note); blank for embryo/oocyte
   items: AuditItem[];
 }
 
@@ -55,6 +57,7 @@ export interface AuditCase {
   pid: string;
   orDate: string;
   expectedSample: string;
+  expectedBankCode: string;   // '' for embryo/oocyte cases
   expectedItems: AuditItem[];
 }
 
@@ -111,6 +114,7 @@ export function buildCase(rec: RawRecord, date: Date): AuditCase {
     pid,
     orDate,
     expectedSample: sampleText(rec),
+    expectedBankCode: bankCodeFromNote(rec.sperm266?.note ?? ''),
     expectedItems,
   };
 }
@@ -123,6 +127,7 @@ export function blankAudit(c: AuditCase, auditor: string): AuditRecord {
     expectedSample: c.expectedSample, sampleCheck: '', actualSample: '', sampleNote: '',
     signatures: '', cfCompliance: '', storageCompliance: '', discardingProc: '',
     complianceNotes: '', finalResult: '',
+    bank: { expected: c.expectedBankCode, actual: '', check: '', note: '' },
     items: c.expectedItems.map(it => ({ ...it, fields: cloneFields(it.fields) })),
   };
 }
@@ -147,6 +152,10 @@ export function validateAudit(rec: AuditRecord): string {
   if (!rec.auditor.trim()) return 'Vui lòng nhập Auditor';
   if (!rec.sampleCheck) return 'Vui lòng tick Đúng/Sai cho Sample';
   if (rec.sampleCheck === 'Sai' && !rec.actualSample.trim()) return 'Vui lòng nhập Actual Sample';
+  if (rec.bank.expected) {
+    if (!rec.bank.check) return 'Vui lòng tick Đúng/Sai cho Sperm bank code';
+    if (rec.bank.check === 'Sai' && !rec.bank.actual.trim()) return 'Vui lòng nhập Actual Sperm bank code';
+  }
   if (!rec.signatures || !rec.cfCompliance || !rec.storageCompliance || !rec.discardingProc) {
     return 'Vui lòng hoàn tất Compliance';
   }

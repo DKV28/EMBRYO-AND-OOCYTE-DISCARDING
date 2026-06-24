@@ -22,7 +22,8 @@ const state: SessionState = {
       saveCount: 1, timestamp: '10:00 10/06/2026', expectedSample: 'Embryo: 9',
       sampleCheck: 'Đúng', actualSample: '', sampleNote: '',
       signatures: 'YES', cfCompliance: 'YES', storageCompliance: 'NO', discardingProc: 'YES',
-      complianceNotes: '', finalResult: 'Không đạt', items: [],
+      complianceNotes: '', finalResult: 'Không đạt',
+      bank: { expected: '2414418', actual: '', check: 'Đúng', note: '' }, items: [],
     },
   },
 };
@@ -37,6 +38,7 @@ describe('session serialize/deserialize', () => {
     expect(back.compliance['A.pdf|E19G9T'].signatures).toBe('No');
     expect(back.audits['A.pdf'].finalResult).toBe('Không đạt');
     expect(back.audits['A.pdf'].storageCompliance).toBe('NO');
+    expect(back.audits['A.pdf'].bank.expected).toBe('2414418');
   });
 
   it('rejects an unknown schema version', () => {
