@@ -32,6 +32,14 @@ function complianceCell(value: string, onChange: (v: string) => void): HTMLTable
   return cell;
 }
 
+// Sperm-bank code for sperm (266) rows: pull it out of the "Ghi chú" note.
+// Strips a leading "Mã NHTT:" style label; embryo/oocyte rows (note 'N/A') show blank.
+function bankCode(note: string): string {
+  if (!note || note === 'N/A') return '';
+  const m = note.match(/nhtt\s*:?\s*(\S.*)$/i);
+  return (m ? m[1] : note).trim();
+}
+
 export function renderPreview(rows: OutputRow[]): HTMLTableElement {
   const table = document.createElement('table');
   const thead = table.createTHead();
@@ -43,6 +51,7 @@ export function renderPreview(rows: OutputRow[]): HTMLTableElement {
     th('Location', '', { rowspan: '2' }), th('Number of cassettes', '', { rowspan: '2' }),
     th('Color of cassettes', '', { rowspan: '2' }), th('Number of tec', '', { rowspan: '2' }),
     th('Color of tec', '', { rowspan: '2' }),
+    th('Sperm bank code', '', { rowspan: '2' }),
     th('Compliance', 'group-compliance', { colspan: '4' }),
   );
   const r2 = thead.insertRow();
@@ -68,6 +77,7 @@ export function renderPreview(rows: OutputRow[]): HTMLTableElement {
     tr.append(
       td(r.location), td(num(r.numCassettes)), td(r.cassetteColor),
       td(num(r.numTec)), td(r.tecColor),
+      td(bankCode(r.note)),
       complianceCell(r.storageCompliance, v => { r.storageCompliance = v; }),
       complianceCell(r.cfCompliance, v => { r.cfCompliance = v; }),
       complianceCell(r.discardingProcedure, v => { r.discardingProcedure = v; }),

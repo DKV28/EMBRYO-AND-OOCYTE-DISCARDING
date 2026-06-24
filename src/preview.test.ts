@@ -21,6 +21,7 @@ const rows: OutputRow[] = [
 const spermRow = baseRow({
   no: 2, pid: 'M: 2410022517', orDate: 'N/A',
   sperm: 1, location: 'TS4-G2D', numCassettes: 'N/A', cassetteColor: 'N/A', numTec: 'N/A', tecColor: 'N/A',
+  note: 'MÃ NHTT: 2414418',
 });
 
 describe('renderPreview', () => {
@@ -40,7 +41,7 @@ describe('renderPreview', () => {
     const heads = Array.from(table.querySelectorAll('thead th')).map(t => t.textContent);
     expect(heads).toEqual(expect.arrayContaining([
       'No.', 'PID', 'OR Date', 'Sample', 'Embryo', 'Oocyte', 'Sperm', 'Location',
-      'Number of cassettes', 'Compliance', 'Storage', 'CF', 'Discarding', 'Signatures',
+      'Number of cassettes', 'Sperm bank code', 'Compliance', 'Storage', 'CF', 'Discarding', 'Signatures',
     ]));
     // dropped columns must NOT appear anymore
     expect(heads).not.toContain('Freeze date');
@@ -53,7 +54,14 @@ describe('renderPreview', () => {
     const cells = Array.from(table.querySelectorAll('tbody td')).map(t => t.textContent);
     expect(cells).toContain('TS4-G2D');
     expect(cells).toContain('1');                                  // sperm count
+    expect(cells).toContain('2414418');                           // sperm bank code (code only)
     expect(cells.filter(c => c === 'N/A').length).toBeGreaterThanOrEqual(5); // OR date + 4 cassette/tec cols
+  });
+
+  it('leaves the sperm bank code blank for embryo rows', () => {
+    const table = renderPreview(rows); // embryo rows, note 'N/A'
+    expect(table.textContent).not.toContain('NHTT');
+    expect(table.textContent).not.toContain('2414418');
   });
 
   it('renders four compliance columns as N/A/Yes/No dropdowns, default empty', () => {
