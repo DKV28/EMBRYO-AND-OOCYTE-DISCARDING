@@ -1,0 +1,25 @@
+name: Supabase keep-alive
+
+# Free Supabase projects pause after ~7 days with no requests. This pings the
+# project's REST API daily so it stays active without anyone opening the app.
+# The anon key is a public frontend key (already shipped in the web bundle).
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # every day at 03:17 UTC
+  workflow_dispatch: {}     # allow manual "Run workflow" for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST (counts as DB activity)
+        env:
+          SUPABASE_URL: https://ackfeuuybqfscbycyfcs.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFja2ZldXV5YnFmc2NieWN5ZmNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTQxMzYsImV4cCI6MjA5Njc5MDEzNn0.JRpieS3Df940ccZryPhZ5twyb8KW4gM1rScVpmVhkRo
+        run: |
+          curl -fsS \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/audit_sessions?select=id&limit=1" \
+            -o /dev/null -w "Supabase ping OK: HTTP %{http_code}\n"
